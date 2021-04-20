@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup as bs
 from colors import *
 
 
-#DUCE-CLI
+# DUCE-CLI
 
 ############## Scraper
 def discudemy():
@@ -19,35 +19,36 @@ def discudemy():
     du_links = []
     big_all = []
     head = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     }
 
     for page in range(1, 4):
-        r = requests.get('https://www.discudemy.com/all/' + str(page), headers=head)
-        soup = bs(r.content, 'html5lib')
-        all = soup.find_all('section', 'card')
+        r = requests.get("https://www.discudemy.com/all/" + str(page), headers=head)
+        soup = bs(r.content, "html5lib")
+        all = soup.find_all("section", "card")
         big_all.extend(all)
         main_window["p0"].update(page)
     main_window["p0"].update(0, max=len(big_all))
 
     for index, items in enumerate(big_all):
-        main_window["p0"].update(index+1)
+        main_window["p0"].update(index + 1)
         try:
             title = items.a.text
-            url = items.a['href']
+            url = items.a["href"]
 
             r = requests.get(url, headers=head)
-            soup = bs(r.content, 'html5lib')
-            next = soup.find('div', 'ui center aligned basic segment')
-            url = next.a['href']
+            soup = bs(r.content, "html5lib")
+            next = soup.find("div", "ui center aligned basic segment")
+            url = next.a["href"]
             r = requests.get(url, headers=head)
-            soup = bs(r.content, 'html5lib')
-            du_links.append(title + '|:|' + soup.find('div', 'ui segment').a['href'])
+            soup = bs(r.content, "html5lib")
+            du_links.append(title + "|:|" + soup.find("div", "ui segment").a["href"])
         except AttributeError:
             continue
     main_window["p0"].update(0, visible=False)
     main_window["img0"].update(visible=True)
+
 
 def udemy_freebies():
     global uf_links
@@ -55,21 +56,26 @@ def udemy_freebies():
     big_all = []
 
     for page in range(1, 3):
-        r = requests.get('https://www.udemyfreebies.com/free-udemy-courses/' + str(page))
-        soup = bs(r.content, 'html5lib')
-        all = soup.find_all('div', 'coupon-name')
+        r = requests.get(
+            "https://www.udemyfreebies.com/free-udemy-courses/" + str(page)
+        )
+        soup = bs(r.content, "html5lib")
+        all = soup.find_all("div", "coupon-name")
         big_all.extend(all)
         main_window["p1"].update(page)
     main_window["p1"].update(0, max=len(big_all))
 
     for index, items in enumerate(big_all):
-        main_window["p1"].update(index+1)
+        main_window["p1"].update(index + 1)
         title = items.a.text
-        url = bs(requests.get(items.a['href']).content, 'html5lib').find('a', class_='button-icon')['href']
+        url = bs(requests.get(items.a["href"]).content, "html5lib").find(
+            "a", class_="button-icon"
+        )["href"]
         link = requests.get(url).url
-        uf_links.append(title + '|:|' + link)
+        uf_links.append(title + "|:|" + link)
     main_window["p1"].update(0, visible=False)
     main_window["img1"].update(visible=True)
+
 
 def tutorialbar():
 
@@ -78,27 +84,28 @@ def tutorialbar():
     big_all = []
 
     for page in range(1, 4):
-        r = requests.get(
-            'https://www.tutorialbar.com/all-courses/page/' + str(page))
-        soup = bs(r.content, 'html5lib')
+        r = requests.get("https://www.tutorialbar.com/all-courses/page/" + str(page))
+        soup = bs(r.content, "html5lib")
         all = soup.find_all(
-            'div', class_='content_constructor pb0 pr20 pl20 mobilepadding')
+            "div", class_="content_constructor pb0 pr20 pl20 mobilepadding"
+        )
         big_all.extend(all)
         main_window["p2"].update(page)
     main_window["p2"].update(0, max=len(big_all))
 
     for index, items in enumerate(big_all):
-        main_window["p2"].update(index+1)
+        main_window["p2"].update(index + 1)
         title = items.a.text
-        url = items.a['href']
+        url = items.a["href"]
 
         r = requests.get(url)
-        soup = bs(r.content, 'html5lib')
-        link = soup.find('a', class_='btn_offer_block re_track_btn')['href']
-        if 'www.udemy.com' in link:
-            tb_links.append(title + '|:|' + link)
+        soup = bs(r.content, "html5lib")
+        link = soup.find("a", class_="btn_offer_block re_track_btn")["href"]
+        if "www.udemy.com" in link:
+            tb_links.append(title + "|:|" + link)
     main_window["p2"].update(0, visible=False)
     main_window["img2"].update(visible=True)
+
 
 def real_discount():
 
@@ -107,145 +114,120 @@ def real_discount():
     big_all = []
 
     for page in range(1, 4):
-        r = requests.get('https://app.real.discount/stores/Udemy?page=' + str(page))
-        soup = bs(r.content, 'html5lib')
-        all = soup.find_all('div', class_='card-body')
+        r = requests.get("https://app.real.discount/stores/Udemy?page=" + str(page))
+        soup = bs(r.content, "html5lib")
+        all = soup.find_all("div", class_="card-body")
         big_all.extend(all)
     main_window["p3"].update(page)
     main_window["p3"].update(0, max=len(big_all))
 
     for index, items in enumerate(big_all):
-        main_window["p3"].update(index+1)
+        main_window["p3"].update(index + 1)
         title = items.a.h3.text
-        url = 'https://app.real.discount' + items.a['href']
+        url = "https://app.real.discount" + items.a["href"]
         r = requests.get(url)
-        soup = bs(r.content, 'html5lib')
+        soup = bs(r.content, "html5lib")
         try:
-            link = soup.select_one('#panel > div:nth-child(4) > div:nth-child(1) > div.col-lg-7.col-md-12.col-sm-12.col-xs-12 > a')['href']
-            if link.startswith('https://www.udemy.com'):
-                rd_links.append(title + '|:|' + link)
+            link = soup.select_one(
+                "#panel > div:nth-child(4) > div:nth-child(1) > div.col-lg-7.col-md-12.col-sm-12.col-xs-12 > a"
+            )["href"]
+            if link.startswith("https://www.udemy.com"):
+                rd_links.append(title + "|:|" + link)
         except:
             pass
 
     main_window["p3"].update(0, visible=False)
     main_window["img3"].update(visible=True)
 
+
 def coursevania():
 
     global cv_links
     cv_links = []
-    r = requests.get('https://coursevania.com/courses/')
-    soup = bs(r.content, 'html5lib')
+    r = requests.get("https://coursevania.com/courses/")
+    soup = bs(r.content, "html5lib")
     nonce = soup.find_all("script")[22].text[30:]
-    nonce = json.loads(nonce[:len(nonce)-6])['load_content']
-    r = requests.get('https://coursevania.com/wp-admin/admin-ajax.php?&template=courses/grid&args={%22posts_per_page%22:%2230%22}&action=stm_lms_load_content&nonce=' + nonce + '&sort=date_high').json()
-    soup = bs(r['content'], 'html5lib')
-    all = soup.find_all('div', attrs={"class":"stm_lms_courses__single--title"})
+    nonce = json.loads(nonce[: len(nonce) - 6])["load_content"]
+    r = requests.get(
+        "https://coursevania.com/wp-admin/admin-ajax.php?&template=courses/grid&args={%22posts_per_page%22:%2230%22}&action=stm_lms_load_content&nonce="
+        + nonce
+        + "&sort=date_high"
+    ).json()
+    soup = bs(r["content"], "html5lib")
+    all = soup.find_all("div", attrs={"class": "stm_lms_courses__single--title"})
     main_window["p4"].update(0, max=len(all))
 
-    for index,item in enumerate(all):
-        main_window["p4"].update(index+1)
+    for index, item in enumerate(all):
+        main_window["p4"].update(index + 1)
         title = item.h5.text
-        r = requests.get(item.a['href'])
-        soup = bs(r.content, 'html5lib')
-        cv_links.append(title + '|:|' + soup.find('div', attrs={"class":"stm-lms-buy-buttons"}).a['href'])
+        r = requests.get(item.a["href"])
+        soup = bs(r.content, "html5lib")
+        cv_links.append(
+            title
+            + "|:|"
+            + soup.find("div", attrs={"class": "stm-lms-buy-buttons"}).a["href"]
+        )
     main_window["p4"].update(0, visible=False)
     main_window["img4"].update(visible=True)
+
 
 def idcoupons():
 
     global idc_links
     idc_links = []
     big_all = []
-    for page in range(1,4):
-        r = requests.get('https://idownloadcoupon.com/product-category/udemy-2/page/'+ str(page))
-        soup = bs(r.content, 'html5lib')
-        all = soup.find_all('a', attrs={"class":"button product_type_external"})
+    for page in range(1, 4):
+        r = requests.get(
+            "https://idownloadcoupon.com/product-category/udemy-2/page/" + str(page)
+        )
+        soup = bs(r.content, "html5lib")
+        all = soup.find_all("a", attrs={"class": "button product_type_external"})
         big_all.extend(all)
     main_window["p5"].update(0, max=len(big_all))
 
-    for index,item in enumerate(big_all):
-        main_window["p5"].update(index+1)
-        title = item['aria-label']
-        link = unquote(item['href']).split('url=')
+    for index, item in enumerate(big_all):
+        main_window["p5"].update(index + 1)
+        title = item["aria-label"]
+        link = unquote(item["href"]).split("url=")
         try:
             link = link[1]
         except IndexError:
             link = link[0]
-        if link.startswith('https://www.udemy.com'):
-            idc_links.append(title + '|:|' + link)
+        if link.startswith("https://www.udemy.com"):
+            idc_links.append(title + "|:|" + link)
     main_window["p5"].update(0, visible=False)
     main_window["img5"].update(visible=True)
 
+
 ########################### Constants
 
-version = 'v1.0'
+version = "v1.0"
 
 def create_scrape_obj():
     funcs = {
-    "0": threading.Thread(target=discudemy, daemon=True),
-    "1": threading.Thread(target=udemy_freebies, daemon=True),
-    "2": threading.Thread(target=tutorialbar, daemon=True),
-    "3": threading.Thread(target=real_discount, daemon=True),
-    "4": threading.Thread(target=coursevania, daemon=True),
-    "5": threading.Thread(target=idcoupons, daemon=True),
-        }   
+        "0": threading.Thread(target=discudemy, daemon=True),
+        "1": threading.Thread(target=udemy_freebies, daemon=True),
+        "2": threading.Thread(target=tutorialbar, daemon=True),
+        "3": threading.Thread(target=real_discount, daemon=True),
+        "4": threading.Thread(target=coursevania, daemon=True),
+        "5": threading.Thread(target=idcoupons, daemon=True),
+    }
     return funcs
 
-all_sites = {
-    "discudemy": 'Discudemy',
-    "udemy_freebies": 'Udemy Freebies',
-    "tutorial_bar": 'Tutorial Bar',
-    "real_discount": 'Real Discount',
-    "course_vania": 'Course Vania',
-    "idownloadcoupons": 'IDownloadCoupons',
-}
 
-all_cat = {
-    "Business": "Business",
-    "Design": "Design",
-    "Development": "Development",
-    "Finance & Accounting": "Finance & Accounting",
-    "c4": "Health & Fitness",
-    "c5": "IT & Software",
-    "c6": "Lifestyle",
-    "c7": "Marketing",
-    "c8": "Music",
-    "c9": "Office Productivity",
-    "c10": "Personal Development",
-    "c11": "Photography & Video",
-    "c12": "Teaching & Academics",
-}
-
-all_lang = {
-    "l0": "Chinese",
-    "l1": "Dutch",
-    "l2": "English",
-    "l3": "French",
-    "l4": "German",
-    "l5": "Indonesian",
-    "l6": "Italian",
-    "l7": "Japanese",
-    "l8": "Korean",
-    "l9": "Polish",
-    "l10": "Portuguese",
-    "l11": "Romanian",
-    "l12": "Spanish",
-    "l13": "Thai",
-    "l14": "Turkish",
-}
-
-animation = ["|","/", "---", "\\"]
+animation = ["|", "/", "---", "\\"]
 
 ################
 def cookiejar(client_id, access_token):
     cookies = dict(client_id=client_id, access_token=access_token)
     return cookies
 
+
 def save_config(config):
     if True:
         with open("duce-cli-settings.json", "w") as f:
             json.dump(config, f, indent=4)
+
 
 def load_config():
     try:
@@ -253,91 +235,125 @@ def load_config():
             config = json.load(f)
 
     except FileNotFoundError:
-        config = requests.get('https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json').json()
+        config = requests.get("https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json").json()
 
-    instructor_exclude = '\n'.join(config['exclude_instructor'])
+    instructor_exclude = "\n".join(config["exclude_instructor"])
 
     save_config(config)
 
     return config, instructor_exclude
 
+
 def get_course_id(url):
     r2 = s.get(url, headers=head)
-    soup = bs(r2.content, 'html5lib')
+    soup = bs(r2.content, "html5lib")
     if r2.status_code == 404:
-        return ''
+        return ""
 
     else:
         try:
-            courseid = soup.find('body', attrs={"class": "ud-app-loader ud-component--course-landing-page-free-udlite udemy"})['data-clp-course-id']
+            courseid = soup.find(
+                "body",
+                attrs={
+                    "class": "ud-app-loader ud-component--course-landing-page-free-udlite udemy"
+                },
+            )["data-clp-course-id"]
         except:
-            courseid = soup.find('body', attrs={"data-module-id": "course-landing-page/udlite"})['data-clp-course-id']
+            courseid = soup.find(
+                "body", attrs={"data-module-id": "course-landing-page/udlite"}
+            )["data-clp-course-id"]
             # with open("problem.txt","w",encoding="utf-8") as f:
             # f.write(str(soup))
     return courseid
+
 
 def get_course_coupon(url):
     query = urlsplit(url).query
     params = parse_qs(query)
     try:
         params = {k: v[0] for k, v in params.items()}
-        return params['couponCode']
+        return params["couponCode"]
     except:
-        return ''
+        return ""
+
 
 def get_catlang(courseid):
-    r = s.get('https://www.udemy.com/api-2.0/courses/' + courseid + '/?fields[course]=locale,primary_category', headers=head).json()
+    r = s.get(
+        "https://www.udemy.com/api-2.0/courses/"
+        + courseid
+        + "/?fields[course]=locale,primary_category",
+        headers=head,
+    ).json()
     return r["primary_category"]["title"], r["locale"]["simple_english_title"]
 
-def course_landing_api(courseid):
-    r = s.get('https://www.udemy.com/api-2.0/course-landing-components/' + courseid + '/me/?components=purchase,instructor_bio', headers=head).json()
 
-    instructor = r['instructor_bio']['data']['instructors_info'][0]['absolute_url'].lstrip('/user/').rstrip('/')
+def course_landing_api(courseid):
+    r = s.get(
+        "https://www.udemy.com/api-2.0/course-landing-components/"
+        + courseid
+        + "/me/?components=purchase,instructor_bio",
+        headers=head,
+    ).json()
+
+    instructor = (
+        r["instructor_bio"]["data"]["instructors_info"][0]["absolute_url"]
+        .lstrip("/user/")
+        .rstrip("/")
+    )
     try:
-        purchased = r['purchase']['data']['purchase_date']
+        purchased = r["purchase"]["data"]["purchase_date"]
     except:
         purchased = False
     try:
-        amount = r['purchase']['data']['list_price']['amount']
+        amount = r["purchase"]["data"]["list_price"]["amount"]
     except:
-        print(r['purchase']['data'])
+        print(r["purchase"]["data"])
 
     return instructor, purchased, amount
 
+
 def update_courses():
     while True:
-        r = s.get('https://www.udemy.com/api-2.0/users/me/subscribed-courses/', headers=head).json()
+        r = s.get(
+            "https://www.udemy.com/api-2.0/users/me/subscribed-courses/", headers=head
+        ).json()
         new_menu = [
-            ['About', ['Support', 'Github', 'Discord']],
+            ["About", ["Support", "Github", "Discord"]],
             [f'Total Courses: {r["count"]}'],
         ]
-        main_window['mn'].Update(menu_definition=new_menu)
+        main_window["mn"].Update(menu_definition=new_menu)
         time.sleep(6)  # So that Udemy's api doesn't get spammed.
 
+
 def update_available():
-    if version.lstrip('v') < requests.get("https://api.github.com/repos/techtanic/DUCE-CLI/releases/latest").json()['tag_name'].lstrip('v'):
-        print(by + fr + '  Update Available  ')
+    if version.lstrip("v") < requests.get(
+        "https://api.github.com/repos/techtanic/DUCE-CLI/releases/latest"
+    ).json()["tag_name"].lstrip("v"):
+        print(by + fr + "  Update Available  ")
     else:
         return
 
+
 def check_login():
     head = {
-        'authorization': 'Bearer ' + access_token,
-        'accept': 'application/json, text/plain, */*',
-        'x-requested-with': 'XMLHttpRequest',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77',
-        'x-forwarded-for': str(ip),
-        'x-udemy-authorization': 'Bearer ' + access_token,
-        'content-type': 'application/json;charset=UTF-8',
-        'origin': 'https://www.udemy.com',
-        'referer': 'https://www.udemy.com/',
-        'dnt': '1',
+        "authorization": "Bearer " + access_token,
+        "accept": "application/json, text/plain, */*",
+        "x-requested-with": "XMLHttpRequest",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
+        "x-forwarded-for": str(ip),
+        "x-udemy-authorization": "Bearer " + access_token,
+        "content-type": "application/json;charset=UTF-8",
+        "origin": "https://www.udemy.com",
+        "referer": "https://www.udemy.com/",
+        "dnt": "1",
     }
 
-    r = requests.get('https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True', headers=head).json()
-    currency = r['Config']['price_country']['currency']
-    user = ''
-    user = r['me']['display_name']
+    r = requests.get(
+        "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True", headers=head
+    ).json()
+    currency = r["Config"]["price_country"]["currency"]
+    user = ""
+    user = r["me"]["display_name"]
 
     s = requests.session()
     s.cookies.update(cookies)
@@ -345,27 +361,55 @@ def check_login():
 
     return head, user, currency, s
 
-#-----------------
-def free_checkout(coupon, courseid):
-    payload = '{"checkout_environment":"Marketplace","checkout_event":"Submit","shopping_info":{"items":[{"discountInfo":{"code":"' + coupon + '"},"buyable":{"type":"course","id":' + str(courseid) + ',"context":{}},"price":{"amount":0,"currency":"' + currency + '"}}]},"payment_info":{"payment_vendor":"Free","payment_method":"free-method"}}'
 
-    r = s.post('https://www.udemy.com/payment/checkout-submit/', headers=head, data=payload, verify=False)
+# -----------------
+def free_checkout(coupon, courseid):
+    payload = (
+        '{"checkout_environment":"Marketplace","checkout_event":"Submit","shopping_info":{"items":[{"discountInfo":{"code":"'
+        + coupon
+        + '"},"buyable":{"type":"course","id":'
+        + str(courseid)
+        + ',"context":{}},"price":{"amount":0,"currency":"'
+        + currency
+        + '"}}]},"payment_info":{"payment_vendor":"Free","payment_method":"free-method"}}'
+    )
+
+    r = s.post(
+        "https://www.udemy.com/payment/checkout-submit/",
+        headers=head,
+        data=payload,
+        verify=False,
+    )
     return r.json()
+
 
 def free_enroll(courseid):
 
-    s.get('https://www.udemy.com/course/subscribe/?courseId=' + str(courseid), headers=head, verify=False)
+    s.get(
+        "https://www.udemy.com/course/subscribe/?courseId=" + str(courseid),
+        headers=head,
+        verify=False,
+    )
 
-    r = s.get('https://www.udemy.com/api-2.0/users/me/subscribed-courses/' + str(courseid) + '/?fields%5Bcourse%5D=%40default%2Cbuyable_object_type%2Cprimary_subcategory%2Cis_private', headers=head, verify=False)
+    r = s.get(
+        "https://www.udemy.com/api-2.0/users/me/subscribed-courses/"
+        + str(courseid)
+        + "/?fields%5Bcourse%5D=%40default%2Cbuyable_object_type%2Cprimary_subcategory%2Cis_private",
+        headers=head,
+        verify=False,
+    )
     return r.json()
-#-----------------
+
+
+# -----------------
+
 
 def auto(list_st):
 
     se_c, ae_c, e_c, ex_c, as_c = 0, 0, 0, 0, 0
     for index, link in enumerate(list_st):
 
-        title = link.split('|:|')
+        title = link.split("|:|")
         #
         link = title[1]
         #
@@ -382,78 +426,87 @@ def auto(list_st):
             if not purchased:
 
                 if couponID:
-                    slp = ''
+                    slp = ""
 
                     js = free_checkout(couponID, course_id)
                     try:
-                        if js['status'] == 'succeeded':
+                        if js["status"] == "succeeded":
                             #
                             se_c += 1
                             as_c += amount
 
-                        elif js['status'] == 'failed':
+                        elif js["status"] == "failed":
                             # print(js)
                             #
                             e_c += 1
 
                     except:
                         try:
-                            msg = js['detail']
+                            msg = js["detail"]
                             #
-                            slp = int(re.search(r'\d+', msg).group(0))
+                            slp = int(re.search(r"\d+", msg).group(0))
                         except:
                             # print(js)
                             #
                             e_c += 1
 
-                    if slp != '':
+                    if slp != "":
                         slp += 5
-                        main_window['out'].print('>>> Pausing execution of script for ' + str(slp) + ' seconds', text_color='red')
+                        main_window["out"].print(
+                            ">>> Pausing execution of script for "
+                            + str(slp)
+                            + " seconds",
+                            text_color="red",
+                        )
                         time.sleep(slp)
-                        main_window['out'].print()
+                        main_window["out"].print()
                     else:
                         time.sleep(3)
 
                 elif not couponID:
                     js = free_enroll(course_id)
                     try:
-                        if js['_class'] == 'course':
-                            main_window['out'].print('Successfully Subscribed', text_color='green')
-                            main_window['out'].print()
+                        if js["_class"] == "course":
+                            main_window["out"].print(
+                                "Successfully Subscribed", text_color="green"
+                            )
+                            main_window["out"].print()
                             se_c += 1
                             as_c += amount
 
                     except:
-                        main_window['out'].print('COUPON MIGHT HAVE EXPIRED', text_color='red')
-                        main_window['out'].print()
+                        main_window["out"].print(
+                            "COUPON MIGHT HAVE EXPIRED", text_color="red"
+                        )
+                        main_window["out"].print()
                         e_c += 1
 
             elif purchased:
-                main_window['out'].print(purchased, text_color='light blue')
-                main_window['out'].print()
+                main_window["out"].print(purchased, text_color="light blue")
+                main_window["out"].print()
                 ae_c += 1
 
         else:
-            main_window['out'].print("User not interested", text_color='light blue')
-            main_window['out'].print()
+            main_window["out"].print("User not interested", text_color="light blue")
+            main_window["out"].print()
             ex_c += 1
 
-    
-        main_window['pout'].update(index+1)
-    
+        main_window["pout"].update(index + 1)
 
-    main_window['se_c'].update(value=f'Successfully Enrolled: {se_c}')
-    main_window['as_c'].update(value=f'Amount Saved: ${as_c}')
-    main_window['ae_c'].update(value=f'Already Enrolled: {ae_c}')
-    main_window['e_c'].update(value=f'Expired Courses: {e_c}')
-    main_window['ex_c'].update(value=f'Excluded Courses: {ex_c}')
+    main_window["se_c"].update(value=f"Successfully Enrolled: {se_c}")
+    main_window["as_c"].update(value=f"Amount Saved: ${as_c}")
+    main_window["ae_c"].update(value=f"Already Enrolled: {ae_c}")
+    main_window["e_c"].update(value=f"Expired Courses: {e_c}")
+    main_window["ex_c"].update(value=f"Excluded Courses: {ex_c}")
+
 
 def random_col():
-    col = ['green', 'yellow', 'white']
+    col = ["green", "yellow", "white"]
     return random.choice(col)
 
 
 ##########################################
+
 
 def main1():
     try:
@@ -464,7 +517,6 @@ def main1():
             funcs[index].start()
         for t in funcs:
             funcs[t].join()
-
 
         try:  # du_links
             links_ls += du_links
@@ -493,13 +545,12 @@ def main1():
 
         auto(links_ls)
 
-
     except:
         e = traceback.format_exc()
         print(e)
-    
-    
-    main_window['output_col'].Update(visible=False)
+
+    main_window["output_col"].Update(visible=False)
+
 
 config, instructor_exclude = load_config()
 ip = ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
@@ -508,14 +559,14 @@ ip = ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
 
 
 try:
-    access_token = config['access_token']
-    client_id = config['client_id']
-    csrftoken = ''
+    access_token = config["access_token"]
+    client_id = config["client_id"]
+    csrftoken = ""
     cookies = cookiejar(client_id, access_token)
     head, user, currency, s = check_login()
-        
+
 except Exception as e:
-    print(fr + 'Login error')
+    print(fr + "Login error")
     exit()
 try:
     update_available()
@@ -528,7 +579,7 @@ funcs = {}
 sites = {}
 categories = []
 languages = []
-instructor_exclude = config['exclude_instructor']
+instructor_exclude = config["exclude_instructor"]
 user_dumb = True
 
 for i in all_sites:
@@ -547,11 +598,11 @@ for index in all_lang:
 
 if user_dumb:
     sg.popup_auto_close(
-        'What do you even expect to happen!', auto_close_duration=5, no_titlebar=True)
+        "What do you even expect to happen!", auto_close_duration=5, no_titlebar=True
+    )
 if not user_dumb:
     for index in all_functions:
         main_window[f"p{index}"].update(0, visible=True)
         main_window[f"img{index}"].update(visible=False)
         main_window[f"pcol{index}"].update(visible=False)
     threading.Thread(target=main1, daemon=True).start()
-
