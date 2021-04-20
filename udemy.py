@@ -13,7 +13,7 @@ from colors import *
 
 # DUCE-CLI
 
-############## Scraper
+# Scraper
 def discudemy():
     global du_links
     du_links = []
@@ -199,18 +199,19 @@ def idcoupons():
     main_window["img5"].update(visible=True)
 
 
-########################### Constants
+# Constants
 
 version = "v1.0"
 
+
 def create_scrape_obj():
     funcs = {
-        "0": threading.Thread(target=discudemy, daemon=True),
-        "1": threading.Thread(target=udemy_freebies, daemon=True),
-        "2": threading.Thread(target=tutorialbar, daemon=True),
-        "3": threading.Thread(target=real_discount, daemon=True),
-        "4": threading.Thread(target=coursevania, daemon=True),
-        "5": threading.Thread(target=idcoupons, daemon=True),
+        "Discudemy": threading.Thread(target=discudemy, daemon=True),
+        "Udemy Freebies": threading.Thread(target=udemy_freebies, daemon=True),
+        "Tutorial Bar": threading.Thread(target=tutorialbar, daemon=True),
+        "Real Discount": threading.Thread(target=real_discount, daemon=True),
+        "Course Vania": threading.Thread(target=coursevania, daemon=True),
+        "IDownloadCoupons": threading.Thread(target=idcoupons, daemon=True),
     }
     return funcs
 
@@ -218,6 +219,8 @@ def create_scrape_obj():
 animation = ["|", "/", "---", "\\"]
 
 ################
+
+
 def cookiejar(client_id, access_token):
     cookies = dict(client_id=client_id, access_token=access_token)
     return cookies
@@ -235,7 +238,9 @@ def load_config():
             config = json.load(f)
 
     except FileNotFoundError:
-        config = requests.get("https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json").json()
+        config = requests.get(
+            "https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json"
+        ).json()
 
     instructor_exclude = "\n".join(config["exclude_instructor"])
 
@@ -388,7 +393,6 @@ def free_enroll(courseid):
     s.get(
         "https://www.udemy.com/course/subscribe/?courseId=" + str(courseid),
         headers=head,
-        verify=False,
     )
 
     r = s.get(
@@ -396,7 +400,6 @@ def free_enroll(courseid):
         + str(courseid)
         + "/?fields%5Bcourse%5D=%40default%2Cbuyable_object_type%2Cprimary_subcategory%2Cis_private",
         headers=head,
-        verify=False,
     )
     return r.json()
 
@@ -576,30 +579,28 @@ except:
 
 all_functions = create_scrape_obj()
 funcs = {}
-sites = {}
+sites = []
 categories = []
 languages = []
 instructor_exclude = config["exclude_instructor"]
 user_dumb = True
 
-for i in all_sites:
-    if config[i]:
-        funcs[i] = all_functions[i]
-        sites[i] = all_sites[i]
+for name in config["sites"]:
+    if config["sites"][name]:
+        funcs[name] = all_functions[name]
+        sites.append(name)
         user_dumb = False
 
-for index in all_cat:
-    if values[index]:
-        categories.append(all_cat[index])
+for cat in config["category"]:
+    if config["category"][cat]:
+        categories.append(cat)
 
-for index in all_lang:
-    if values[index]:
-        languages.append(all_lang[index])
+for lang in config["category"]:
+    if config["category"][lang]:
+        languages.append(lang)
 
 if user_dumb:
-    sg.popup_auto_close(
-        "What do you even expect to happen!", auto_close_duration=5, no_titlebar=True
-    )
+    print(bw + fr + "  No sites selected  ")
 if not user_dumb:
     for index in all_functions:
         main_window[f"p{index}"].update(0, visible=True)
