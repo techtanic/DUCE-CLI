@@ -13,6 +13,7 @@
 # Discounted Udemy Course Enroller
 
 > Script to enroll in available Udemy Paid/Free courses having coupons automatically to your Udemy account.
+> This is a Command Line Version of the [GUI](https://techtanic.github.io/duce/).
 
 Checkout the website: [techtanic.github.io/duce](https://techtanic.github.io/duce/)
 Everything you need can be on the website.
@@ -25,8 +26,6 @@ comming soon
 
 ## Key Features
 
-- Beautiful GUI.
-- One click login.
 - One click to add all available courses with coupons to your udemy account.
 - Uses popular sites for coupons.
 - Many more features
