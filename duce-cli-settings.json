@@ -1,6 +1,6 @@
 {
-    "access_token": "",
-    "client_id": "",
+    "access_token": "2dajD7ZxkfSRDmm2op4xEIHbzevVvLr9Ve95jARY",
+    "client_id": "bd2565cb7b0c313f5e9bae44961e8db2",
     "languages": {
         "l0": true,
         "l1": true,
@@ -34,13 +34,12 @@
         "c12": true
     },
     "sites": {
-        "0": true,
-        "1": true,
-        "2": true,
-        "3": true,
-        "4": true,
-        "5": true,
-        "6": true
+        "Discudemy": true,
+        "Udemy Freebies": true,
+        "Tutorial Bar": true,
+        "Real Discount": true,
+        "Course Vania": true,
+        "IDownloadCoupons": true
     },
     "exclude_instructor": [
         "instructor-1",

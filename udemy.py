@@ -193,19 +193,19 @@ def create_scrape_obj():
     return funcs
 
 all_sites = {
-    "0": 'Discudemy',
-    "1": 'Udemy Freebies',
-    "2": 'Tutorial Bar',
-    "3": 'Real Discount',
-    "4": 'Course Vania',
-    "5": 'IDownloadCoupons',
+    "discudemy": 'Discudemy',
+    "udemy_freebies": 'Udemy Freebies',
+    "tutorial_bar": 'Tutorial Bar',
+    "real_discount": 'Real Discount',
+    "course_vania": 'Course Vania',
+    "idownloadcoupons": 'IDownloadCoupons',
 }
 
 all_cat = {
-    "c0": "Business",
-    "c1": "Design",
-    "c2": "Development",
-    "c3": "Finance & Accounting",
+    "Business": "Business",
+    "Design": "Design",
+    "Development": "Development",
+    "Finance & Accounting": "Finance & Accounting",
     "c4": "Health & Fitness",
     "c5": "IT & Software",
     "c6": "Lifestyle",
@@ -316,7 +316,7 @@ def update_courses():
 
 def update_available():
     if version.lstrip('v') < requests.get("https://api.github.com/repos/techtanic/DUCE-CLI/releases/latest").json()['tag_name'].lstrip('v'):
-        print("Update available")
+        print(by + fr + '  Update Available  ')
     else:
         return
 
@@ -516,21 +516,12 @@ try:
         
 except Exception as e:
     print(fr + 'Login error')
-    print(e)
     exit()
-update_available()
+try:
+    update_available()
+except:
+    pass
 
-
-
-for index in all_lang:
-    config["languages"][index] = values[index]
-for index in all_cat:
-    config["category"][index] = values[index]
-for index in all_sites:
-    config["sites"][index] = values[index]
-config['exclude_instructor'] = values['instructor_exclude'].split()
-
-save_config(config)
 
 all_functions = create_scrape_obj()
 funcs = {}
@@ -541,7 +532,7 @@ instructor_exclude = config['exclude_instructor']
 user_dumb = True
 
 for i in all_sites:
-    if values[i]:
+    if config[i]:
         funcs[i] = all_functions[i]
         sites[i] = all_sites[i]
         user_dumb = False

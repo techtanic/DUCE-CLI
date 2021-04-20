@@ -7,6 +7,7 @@ fg = Fore.GREEN
 fw = Fore.WHITE
 fr = Fore.RED
 fb = Fore.BLUE
+fbl = Fore.BLACK
 fy = Fore.YELLOW
 fm = Fore.MAGENTA
 
@@ -17,8 +18,8 @@ bg = Back.GREEN
 bw = Back.WHITE
 br = Back.RED
 bb = Back.BLUE
-by = Fore.YELLOW
-bm = Fore.MAGENTA
+by = Back.YELLOW
+bm = Back.MAGENTA
 
 # colors style text:
 sd = Style.DIM
