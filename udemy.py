@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 from urllib.parse import parse_qs, unquote, urlsplit
-
+from decimal import Decimal
 import requests
 from bs4 import BeautifulSoup as bs
 from colors import *
@@ -98,7 +98,6 @@ def tutorialbar():
             tb_links.append(title + "|:|" + link)
 
 
-
 def real_discount():
 
     global rd_links
@@ -126,7 +125,6 @@ def real_discount():
                 rd_links.append(title + "|:|" + link)
         except:
             pass
-
 
 
 def coursevania():
@@ -182,7 +180,6 @@ def idcoupons():
             link = link[0]
         if link.startswith("https://www.udemy.com"):
             idc_links.append(title + "|:|" + link)
-
 
 
 # Constants
