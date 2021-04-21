@@ -7,6 +7,7 @@ fg = Fore.GREEN
 fw = Fore.WHITE
 fr = Fore.RED
 fb = Fore.BLUE
+flb = Fore.LIGHTBLUE_EX
 fbl = Fore.BLACK
 fy = Fore.YELLOW
 fm = Fore.MAGENTA

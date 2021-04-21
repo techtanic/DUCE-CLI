@@ -1,6 +1,7 @@
 import json
 import random
 import re
+from tqdm import tqdm
 import threading
 import time
 import traceback
@@ -28,11 +29,9 @@ def discudemy():
         soup = bs(r.content, "html5lib")
         all = soup.find_all("section", "card")
         big_all.extend(all)
-        main_window["p0"].update(page)
-    main_window["p0"].update(0, max=len(big_all))
-
+    du_bar = tqdm(total=len(big_all), desc="Discudemy")
     for index, items in enumerate(big_all):
-        main_window["p0"].update(index + 1)
+        du_bar.update(1)
         try:
             title = items.a.text
             url = items.a["href"]
@@ -46,8 +45,6 @@ def discudemy():
             du_links.append(title + "|:|" + soup.find("div", "ui segment").a["href"])
         except AttributeError:
             continue
-    main_window["p0"].update(0, visible=False)
-    main_window["img0"].update(visible=True)
 
 
 def udemy_freebies():
@@ -62,19 +59,16 @@ def udemy_freebies():
         soup = bs(r.content, "html5lib")
         all = soup.find_all("div", "coupon-name")
         big_all.extend(all)
-        main_window["p1"].update(page)
-    main_window["p1"].update(0, max=len(big_all))
+    uf_bar = tqdm(total=len(big_all), desc="Udemy Freebies")
 
     for index, items in enumerate(big_all):
-        main_window["p1"].update(index + 1)
+        uf_bar.update(1)
         title = items.a.text
         url = bs(requests.get(items.a["href"]).content, "html5lib").find(
             "a", class_="button-icon"
         )["href"]
         link = requests.get(url).url
         uf_links.append(title + "|:|" + link)
-    main_window["p1"].update(0, visible=False)
-    main_window["img1"].update(visible=True)
 
 
 def tutorialbar():
@@ -90,11 +84,10 @@ def tutorialbar():
             "div", class_="content_constructor pb0 pr20 pl20 mobilepadding"
         )
         big_all.extend(all)
-        main_window["p2"].update(page)
-    main_window["p2"].update(0, max=len(big_all))
+    tb_bar = tqdm(total=len(big_all), desc="Tutorial Bar")
 
     for index, items in enumerate(big_all):
-        main_window["p2"].update(index + 1)
+        tb_bar.update(1)
         title = items.a.text
         url = items.a["href"]
 
@@ -103,8 +96,7 @@ def tutorialbar():
         link = soup.find("a", class_="btn_offer_block re_track_btn")["href"]
         if "www.udemy.com" in link:
             tb_links.append(title + "|:|" + link)
-    main_window["p2"].update(0, visible=False)
-    main_window["img2"].update(visible=True)
+
 
 
 def real_discount():
@@ -118,11 +110,10 @@ def real_discount():
         soup = bs(r.content, "html5lib")
         all = soup.find_all("div", class_="card-body")
         big_all.extend(all)
-    main_window["p3"].update(page)
-    main_window["p3"].update(0, max=len(big_all))
+    rd_bar = tqdm(total=len(big_all), desc="Real Discount")
 
     for index, items in enumerate(big_all):
-        main_window["p3"].update(index + 1)
+        rd_bar.update(1)
         title = items.a.h3.text
         url = "https://app.real.discount" + items.a["href"]
         r = requests.get(url)
@@ -136,8 +127,6 @@ def real_discount():
         except:
             pass
 
-    main_window["p3"].update(0, visible=False)
-    main_window["img3"].update(visible=True)
 
 
 def coursevania():
@@ -155,10 +144,10 @@ def coursevania():
     ).json()
     soup = bs(r["content"], "html5lib")
     all = soup.find_all("div", attrs={"class": "stm_lms_courses__single--title"})
-    main_window["p4"].update(0, max=len(all))
+    cv_bar = tqdm(total=len(all), desc="Course Vania")
 
     for index, item in enumerate(all):
-        main_window["p4"].update(index + 1)
+        cv_bar.update(1)
         title = item.h5.text
         r = requests.get(item.a["href"])
         soup = bs(r.content, "html5lib")
@@ -167,8 +156,6 @@ def coursevania():
             + "|:|"
             + soup.find("div", attrs={"class": "stm-lms-buy-buttons"}).a["href"]
         )
-    main_window["p4"].update(0, visible=False)
-    main_window["img4"].update(visible=True)
 
 
 def idcoupons():
@@ -183,10 +170,10 @@ def idcoupons():
         soup = bs(r.content, "html5lib")
         all = soup.find_all("a", attrs={"class": "button product_type_external"})
         big_all.extend(all)
-    main_window["p5"].update(0, max=len(big_all))
+    idc_bar = tqdm(total=len(big_all), desc="IDownloadCopouns")
 
     for index, item in enumerate(big_all):
-        main_window["p5"].update(index + 1)
+        idc_bar.update(1)
         title = item["aria-label"]
         link = unquote(item["href"]).split("url=")
         try:
@@ -195,8 +182,7 @@ def idcoupons():
             link = link[0]
         if link.startswith("https://www.udemy.com"):
             idc_links.append(title + "|:|" + link)
-    main_window["p5"].update(0, visible=False)
-    main_window["img5"].update(visible=True)
+
 
 
 # Constants
@@ -314,7 +300,7 @@ def course_landing_api(courseid):
     except:
         print(r["purchase"]["data"])
 
-    return instructor, purchased, amount
+    return instructor, purchased, Decimal(amount)
 
 
 def update_courses():
@@ -411,99 +397,94 @@ def auto(list_st):
 
     se_c, ae_c, e_c, ex_c, as_c = 0, 0, 0, 0, 0
     for index, link in enumerate(list_st):
-
         title = link.split("|:|")
-        #
+        print(fy + str(index) + " " + title[0], end=" ")
         link = title[1]
-        #
-        couponID = get_course_coupon(link)
+        print(fb + link)
         course_id = get_course_id(link)
-        cat, lang = get_catlang(course_id)
-        instructor, purchased, amount = course_landing_api(course_id)
-        if instructor in instructor_exclude:
-            #
-            ex_c += 1
+        if course_id:
+            coupon_id = get_course_coupon(link)
+            cat, lang = get_catlang(course_id)
+            instructor, purchased, amount = course_landing_api(course_id)
+            if instructor in instructor_exclude:
+                print(flb + "Instructor excluded\n")
+                ex_c += 1
 
-        elif cat in categories and lang in languages:
+            elif cat in categories and lang in languages:
 
-            if not purchased:
+                if not purchased:
 
-                if couponID:
-                    slp = ""
+                    if coupon_id:
+                        slp = ""
 
-                    js = free_checkout(couponID, course_id)
-                    try:
-                        if js["status"] == "succeeded":
-                            #
-                            se_c += 1
-                            as_c += amount
-
-                        elif js["status"] == "failed":
-                            # print(js)
-                            #
-                            e_c += 1
-
-                    except:
+                        js = free_checkout(coupon_id, course_id)
                         try:
-                            msg = js["detail"]
-                            #
-                            slp = int(re.search(r"\d+", msg).group(0))
+                            if js["status"] == "succeeded":
+                                print(fg + "Successfully Enrolled\n")
+                                se_c += 1
+                                as_c += amount
+
+                            elif js["status"] == "failed":
+                                # print(js)
+                                print(fr + "Coupon Expired\n")
+                                e_c += 1
+
                         except:
-                            # print(js)
-                            #
+                            try:
+                                msg = js["detail"]
+                                print(fr + msg)
+                                print()
+                                slp = int(re.search(r"\d+", msg).group(0))
+                            except:
+                                # print(js)
+                                print(fr + "Expired Coupon\n")
+                                e_c += 1
+
+                        if slp != "":
+                            slp += 5
+                            print(
+                                fr
+                                + ">>> Pausing execution of script for "
+                                + str(slp)
+                                + " seconds\n",
+                            )
+                            time.sleep(slp)
+                        else:
+                            time.sleep(3.5)
+
+                    elif not coupon_id:
+                        js = free_enroll(course_id)
+                        try:
+                            if js["_class"] == "course":
+                                print(fg + "Successfully Subscribed\n")
+                                se_c += 1
+                                as_c += amount
+
+                        except:
+                            print(fr + "COUPON MIGHT HAVE EXPIRED\n")
                             e_c += 1
 
-                    if slp != "":
-                        slp += 5
-                        main_window["out"].print(
-                            ">>> Pausing execution of script for "
-                            + str(slp)
-                            + " seconds",
-                            text_color="red",
-                        )
-                        time.sleep(slp)
-                        main_window["out"].print()
-                    else:
-                        time.sleep(3)
+                elif purchased:
+                    print(flb + purchased)
+                    print()
+                    ae_c += 1
 
-                elif not couponID:
-                    js = free_enroll(course_id)
-                    try:
-                        if js["_class"] == "course":
-                            main_window["out"].print(
-                                "Successfully Subscribed", text_color="green"
-                            )
-                            main_window["out"].print()
-                            se_c += 1
-                            as_c += amount
+            else:
+                print(flb + "User not interested\n")
+                ex_c += 1
 
-                    except:
-                        main_window["out"].print(
-                            "COUPON MIGHT HAVE EXPIRED", text_color="red"
-                        )
-                        main_window["out"].print()
-                        e_c += 1
+        elif not course_id:
+            print(fr + "Course Doesn't exist\n")
 
-            elif purchased:
-                main_window["out"].print(purchased, text_color="light blue")
-                main_window["out"].print()
-                ae_c += 1
-
-        else:
-            main_window["out"].print("User not interested", text_color="light blue")
-            main_window["out"].print()
-            ex_c += 1
-
-        main_window["pout"].update(index + 1)
-
-    main_window["se_c"].update(value=f"Successfully Enrolled: {se_c}")
-    main_window["as_c"].update(value=f"Amount Saved: ${as_c}")
-    main_window["ae_c"].update(value=f"Already Enrolled: {ae_c}")
-    main_window["e_c"].update(value=f"Expired Courses: {e_c}")
-    main_window["ex_c"].update(value=f"Excluded Courses: {ex_c}")
+        # main_window["pout"].update(index + 1)
+    print(f"Successfully Enrolled: {se_c}")
+    print(f"Already Enrolled: {ae_c}")
+    print(f"Amount Saved: ${round(as_c,2)}")
+    print(f"Expired Courses: {e_c}")
+    print(f"Excluded Courses: {ex_c}")
 
 
-def random_col():
+def random_color():
     col = ["green", "yellow", "white"]
     return random.choice(col)
 
@@ -551,8 +532,6 @@ def main1():
     except:
         e = traceback.format_exc()
         print(e)
-
-    main_window["output_col"].Update(visible=False)
 
 
 config, instructor_exclude = load_config()
@@ -602,8 +581,7 @@ for lang in config["category"]:
 if user_dumb:
     print(bw + fr + "  No sites selected  ")
 if not user_dumb:
-    for index in all_functions:
-        main_window[f"p{index}"].update(0, visible=True)
-        main_window[f"img{index}"].update(visible=False)
-        main_window[f"pcol{index}"].update(visible=False)
-    threading.Thread(target=main1, daemon=True).start()
+    tm = threading.Thread(target=main1, daemon=True)
+    tm.start()
+
+tm.join()
