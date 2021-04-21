@@ -100,6 +100,7 @@ def tutorialbar():
             tb_links.append(title + "|:|" + link)
     tb_bar.close()
 
+
 def real_discount():
 
     global rd_links
@@ -128,6 +129,7 @@ def real_discount():
         except:
             pass
     rd_bar.close()
+
 
 def coursevania():
 
@@ -158,6 +160,7 @@ def coursevania():
         )
     cv_bar.close()
 
+
 def idcoupons():
 
     global idc_links
@@ -183,6 +186,7 @@ def idcoupons():
         if link.startswith("https://www.udemy.com"):
             idc_links.append(title + "|:|" + link)
     idc_bar.close()
+
 
 # Constants
 
@@ -560,8 +564,8 @@ for cat in config["category"]:
     if config["category"][cat]:
         categories.append(cat)
 
-for lang in config["category"]:
-    if config["category"][lang]:
+for lang in config["languages"]:
+    if config["languages"][lang]:
         languages.append(lang)
 
 if user_dumb:
