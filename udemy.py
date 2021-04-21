@@ -173,7 +173,7 @@ def idcoupons():
         soup = bs(r.content, "html5lib")
         all = soup.find_all("a", attrs={"class": "button product_type_external"})
         big_all.extend(all)
-    idc_bar = tqdm(total=len(big_all), desc="IDownloadCopouns")
+    idc_bar = tqdm(total=len(big_all), desc="IDownloadCoupons")
 
     for index, item in enumerate(big_all):
         idc_bar.update(1)
