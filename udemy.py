@@ -205,8 +205,6 @@ def create_scrape_obj():
     return funcs
 
 
-animation = ["|", "/", "---", "\\"]
-
 ################
 
 
@@ -440,7 +438,7 @@ def auto(list_st):
                             )
                             time.sleep(slp)
                         else:
-                            time.sleep(3.5)
+                            time.sleep(4)
 
                     elif not coupon_id:
                         js = free_enroll(course_id)
@@ -486,11 +484,11 @@ def main1():
     try:
         links_ls = []
         for index in funcs:
-            pass
-        for index in funcs:
             funcs[index].start()
+            time.sleep(0.09)
         for t in funcs:
             funcs[t].join()
+        time.sleep(1)
 
         try:  # du_links
             links_ls += du_links
