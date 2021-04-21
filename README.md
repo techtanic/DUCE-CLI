@@ -19,11 +19,6 @@ This is a Command Line Version of the [GUI](https://techtanic.github.io/duce/).
 Checkout the website: [techtanic.github.io/duce](https://techtanic.github.io/duce/)
 Everything you need can be on the website.
 
-<h2><details>
-<summary>Screenshots</summary>
-comming soon
-</details>
-
 
 ## Key Features
 
