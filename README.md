@@ -15,6 +15,7 @@
 This is a Command Line Version of the [GUI](https://techtanic.github.io/duce/).
 
 > Script to enroll in available Udemy Paid/Free courses having coupons automatically to your Udemy account.
+You can host this on a server/vps/rdp/heroku
 
 Checkout the website: [techtanic.github.io/duce](https://techtanic.github.io/duce/)
 Everything you need can be on the website.
