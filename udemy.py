@@ -45,6 +45,7 @@ def discudemy():
             du_links.append(title + "|:|" + soup.find("div", "ui segment").a["href"])
         except AttributeError:
             continue
+    du_bar.close()
 
 
 def udemy_freebies():
@@ -69,6 +70,7 @@ def udemy_freebies():
         )["href"]
         link = requests.get(url).url
         uf_links.append(title + "|:|" + link)
+    uf_bar.close()
 
 
 def tutorialbar():
@@ -96,7 +98,7 @@ def tutorialbar():
         link = soup.find("a", class_="btn_offer_block re_track_btn")["href"]
         if "www.udemy.com" in link:
             tb_links.append(title + "|:|" + link)
-
+    tb_bar.close()
 
 def real_discount():
 
@@ -125,7 +127,7 @@ def real_discount():
                 rd_links.append(title + "|:|" + link)
         except:
             pass
-
+    rd_bar.close()
 
 def coursevania():
 
@@ -154,7 +156,7 @@ def coursevania():
             + "|:|"
             + soup.find("div", attrs={"class": "stm-lms-buy-buttons"}).a["href"]
         )
-
+    cv_bar.close()
 
 def idcoupons():
 
@@ -180,7 +182,7 @@ def idcoupons():
             link = link[0]
         if link.startswith("https://www.udemy.com"):
             idc_links.append(title + "|:|" + link)
-
+    idc_bar.close()
 
 # Constants
 
@@ -298,19 +300,6 @@ def course_landing_api(courseid):
         print(r["purchase"]["data"])
 
     return instructor, purchased, Decimal(amount)
-
-
-def update_courses():
-    while True:
-        r = s.get(
-            "https://www.udemy.com/api-2.0/users/me/subscribed-courses/", headers=head
-        ).json()
-        new_menu = [
-            ["About", ["Support", "Github", "Discord"]],
-            [f'Total Courses: {r["count"]}'],
-        ]
-        main_window["mn"].Update(menu_definition=new_menu)
-        time.sleep(6)  # So that Udemy's api doesn't get spammed.
 
 
 def update_available():
