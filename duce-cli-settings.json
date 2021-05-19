@@ -2,6 +2,7 @@
     "access_token": "paste-here",
     "client_id": "paste-here",
     "languages": {
+        "Arabic": true,
         "Chinese": true,
         "Dutch": true,
         "English": true,
@@ -16,22 +17,8 @@
         "Romanian": true,
         "Spanish": true,
         "Thai": true,
-        "Turkish": true
-    },
-    "category": {
-        "Business": true,
-        "Design": true,
-        "Development": true,
-        "Finance & Accounting": true,
-        "Health & Fitness": true,
-        "IT & Software": true,
-        "Lifestyle": true,
-        "Marketing": true,
-        "Music": true,
-        "Office Productivity": true,
-        "Personal Development": true,
-        "Photography & Video": true,
-        "Teaching & Academics": true
+        "Turkish": true,
+        "Hindi": true
     },
     "sites": {
         "Discudemy": true,
@@ -41,9 +28,15 @@
         "Course Vania": false,
         "IDownloadCoupons": true
     },
-    "exclude_instructor": [
+    "min_rating": 0.0,
+    "instructor_exclude": [
         "instructor-1",
         "instructor-2",
         "more"
+    ],
+    "title_exclude": [
+        "keyword1",
+        "not_case_sensitive",
+        "enjoy_it"
     ]
 }

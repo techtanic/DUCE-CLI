@@ -190,7 +190,7 @@ def idcoupons():
 
 # Constants
 
-version = "v1.0"
+version = "v1.1"
 
 
 def create_scrape_obj():
@@ -229,33 +229,59 @@ def load_config():
             "https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json"
         ).json()
 
-    instructor_exclude = "\n".join(config["exclude_instructor"])
+    new_config = requests.get(
+        "https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json"
+    ).json()
+
+    try:  # v1.1
+        config["languages"]["Hindi"]
+    except KeyError:
+        config["languages"]["Hindi"] = True
+        config["languages"]["Arabic"] = True
+    try:  # v1.1
+        del config["category"]
+        config["categories"] = new_config["categories"]
+    except KeyError:
+        pass
+    try:  # v1.1
+        config["min_rating"]
+    except KeyError:
+        config["min_rating"] = 0.0
+
+    try:  #!Important
+        config["instructor_exclude"] = config["exclude_instructor"]
+        del config["exclude_instructor"]
+    except KeyError:
+        pass
+    instructor_exclude = "\n".join(config["instructor_exclude"])
+    try:
+        title_exclude = "\n".join(config["title_exclude"])
+    except KeyError:
+        config["title_exclude"] = []
+        title_exclude = "\n".join(config["title_exclude"])
 
     save_config(config)
 
-    return config, instructor_exclude
+    return config, instructor_exclude, title_exclude
 
 
 def get_course_id(url):
-    r2 = s.get(url, headers=head)
-    soup = bs(r2.content, "html5lib")
-    if r2.status_code == 404:
-        return ""
+    r = requests.get(url, allow_redirects=False)
+    if r.status_code in (404, 302, 301):
+        return False
+    soup = bs(r.content, "html5lib")
 
-    else:
-        try:
-            courseid = soup.find(
-                "body",
-                attrs={
-                    "class": "ud-app-loader ud-component--course-landing-page-free-udlite udemy"
-                },
-            )["data-clp-course-id"]
-        except:
-            courseid = soup.find(
-                "body", attrs={"data-module-id": "course-landing-page/udlite"}
-            )["data-clp-course-id"]
-            # with open("problem.txt","w",encoding="utf-8") as f:
-            # f.write(str(soup))
+    try:
+        courseid = soup.find(
+            "div",
+            attrs={"data-content-group": "Landing Page"},
+        )["data-course-id"]
+    except:
+        courseid = soup.find(
+            "body", attrs={"data-module-id": "course-landing-page/udlite"}
+        )["data-clp-course-id"]
+        # with open("problem.txt","w",encoding="utf-8") as f:
+        # f.write(str(soup))
     return courseid
 
 
@@ -269,14 +295,18 @@ def get_course_coupon(url):
         return ""
 
 
-def get_catlang(courseid):
+def affiliate_api(courseid):
     r = s.get(
         "https://www.udemy.com/api-2.0/courses/"
         + courseid
-        + "/?fields[course]=locale,primary_category",
+        + "/?fields[course]=locale,primary_category,avg_rating_recent",
         headers=head,
     ).json()
-    return r["primary_category"]["title"], r["locale"]["simple_english_title"]
+    return (
+        r["primary_category"]["title"],
+        r["locale"]["simple_english_title"],
+        round(r["avg_rating_recent"], 1),
+    )
 
 
 def course_landing_api(courseid):
@@ -319,7 +349,9 @@ def check_login():
         "accept": "application/json, text/plain, */*",
         "x-requested-with": "XMLHttpRequest",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
-        "x-forwarded-for": str(ip),
+        "x-forwarded-for": str(
+            ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
+        ),
         "x-udemy-authorization": "Bearer " + access_token,
         "content-type": "application/json;charset=UTF-8",
         "origin": "https://www.udemy.com",
@@ -339,6 +371,15 @@ def check_login():
     s.keep_alive = False
 
     return head, user, currency, s
+
+
+def title_in_exclusion(title, t_x):
+    title_words = title.casefold().split()
+    for word in title_words:
+        word = word.casefold()
+        if word in t_x:
+            return True
+    return False
 
 
 # -----------------
@@ -385,21 +426,39 @@ def auto(list_st):
 
     se_c, ae_c, e_c, ex_c, as_c = 0, 0, 0, 0, 0
     for index, link in enumerate(list_st):
-        title = link.split("|:|")
-        print(fy + str(index) + " " + title[0], end=" ")
-        link = title[1]
+
+        tl = link.split("|:|")
+        print(fy + str(index) + " " + tl[0], end=" ")
+        link = tl[1]
         print(fb + link)
         course_id = get_course_id(link)
+
         if course_id:
             coupon_id = get_course_coupon(link)
-            cat, lang = get_catlang(course_id)
+            cat, lang, avg_rating = affiliate_api(course_id)
             instructor, purchased, amount = course_landing_api(course_id)
-            if instructor in instructor_exclude:
-                print(flb + "Instructor excluded\n")
+            if (
+                instructor in instructor_exclude
+                or title_in_exclusion(tl[0], title_exclude)
+                or cat not in categories
+                or lang not in languages
+                or avg_rating < min_rating
+            ):
+                if instructor in instructor_exclude:
+                    print(flb + f"Instructor excluded: {instructor}")
+                    ex_c += 1
+                elif title_in_exclusion(tl[0], title_exclude):
+                    print(flb + f"Instructor excluded: {instructor}")
+                elif cat not in categories:
+                    print(flb + f"Category excluded: {cat}")
+                elif lang not in languages:
+                    print(flb + f"Languages excluded: {lang}")
+                elif avg_rating < min_rating:
+                    print(flb + f"Poor rating: {avg_rating}")
+                print()
                 ex_c += 1
 
-            elif cat in categories and lang in languages:
-
+            else:
                 if not purchased:
 
                     if coupon_id:
@@ -457,12 +516,9 @@ def auto(list_st):
                     print()
                     ae_c += 1
 
-            else:
-                print(flb + "User not interested\n")
-                ex_c += 1
-
         elif not course_id:
-            print(fr + "Course Doesn't exist\n")
+            print(fr + ".Course Expired.\n")
+            e_c += 1
 
         # main_window["pout"].update(index + 1)
     print(f"Successfully Enrolled: {se_c}")
@@ -522,9 +578,7 @@ def main1():
         print(e)
 
 
-config, instructor_exclude = load_config()
-ip = ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
-
+config, instructor_exclude, title_exclude = load_config()
 ############## MAIN ############# MAIN############## MAIN ############# MAIN ############## MAIN ############# MAIN ###########
 
 
@@ -549,7 +603,9 @@ funcs = {}
 sites = []
 categories = []
 languages = []
-instructor_exclude = config["exclude_instructor"]
+instructor_exclude = config["instructor_exclude"]
+title_exclude = config["title_exclude"]
+min_rating = config["min_rating"]
 user_dumb = True
 
 for name in config["sites"]:
