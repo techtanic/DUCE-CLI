@@ -260,7 +260,6 @@ def load_config():
         config["min_rating"] = 0.0
 
     try:  # v1.2
-        config["access_token"]
         del config["access_token"]
         del config["client_id"]
         config["email"] = ""
@@ -385,7 +384,7 @@ def check_login():
         data=data,
         allow_redirects=False,
     )
-    if r.status_code != 302:
+    if not r.status_code == 302:
         return "", "", "", "", True
     
     cookies = cookiejar(r.cookies["client_id"], r.cookies["access_token"], csrf_token)
@@ -417,7 +416,7 @@ def check_login():
     user = ""
     user = r["me"]["display_name"]
 
-    
+
     save_config(config)
     return head, user, currency, s, False
 
@@ -635,11 +634,12 @@ while retry:
     if not (config["email"] or config["password"]):
         config["email"] = input("Email: ")
         config["password"] = input("Password: ")
-    print("Trying to login")
+    print(fb+"Trying to login")
     head, user, currency, s, retry = check_login()
     if retry:
-        continue
-    
+        print(fr+"Login Error")
+        config["email"] = input("Email: ")
+        config["password"] = input("Password: ")
 try:
     update_available()
 except:
