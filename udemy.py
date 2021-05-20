@@ -1,16 +1,19 @@
 import json
 import random
 import re
-from tqdm import tqdm
 import threading
 import time
 import traceback
-from urllib.parse import parse_qs, unquote, urlsplit
 from decimal import Decimal
-import requests
-from bs4 import BeautifulSoup as bs
-from colors import *
+from urllib.parse import parse_qs, unquote, urlsplit
 
+
+import requests
+import cloudscraper
+from bs4 import BeautifulSoup as bs
+from tqdm import tqdm
+
+from colors import *
 
 # DUCE-CLI
 
@@ -190,7 +193,7 @@ def idcoupons():
 
 # Constants
 
-version = "v1.1"
+version = "v1.2"
 
 
 def create_scrape_obj():
@@ -208,8 +211,16 @@ def create_scrape_obj():
 ################
 
 
-def cookiejar(client_id, access_token):
-    cookies = dict(client_id=client_id, access_token=access_token)
+def cookiejar(
+    client_id,
+    access_token,
+    csrf_token,
+):
+    cookies = dict(
+        client_id=client_id,
+        access_token=access_token,
+        csrf_token=csrf_token,
+    )
     return cookies
 
 
@@ -247,6 +258,15 @@ def load_config():
         config["min_rating"]
     except KeyError:
         config["min_rating"] = 0.0
+
+    try:  # v1.2
+        config["access_token"]
+        del config["access_token"]
+        del config["client_id"]
+        config["email"] = ""
+        config["password"] = ""
+    except:
+        pass
 
     try:  #!Important
         config["instructor_exclude"] = config["exclude_instructor"]
@@ -344,33 +364,62 @@ def update_available():
 
 
 def check_login():
+    s = cloudscraper.create_scraper()
+    r = s.get("https://www.udemy.com/join/login-popup/?locale=en_US")
+    soup = bs(r.text, "html5lib")
+    try:
+        csrf_token = soup.find("input", {"name": "csrfmiddlewaretoken"})["value"]
+    except TypeError:
+        print("Login not possible right now.")
+        exit()
+    data = {
+        "email": config["email"],
+        "password": config["password"],
+        "csrfmiddlewaretoken": csrf_token,
+    }
+    s.headers.update(
+        {"Referer": "https://www.udemy.com/join/login-popup/?locale=en_US"}
+    )
+    r = s.post(
+        "https://www.udemy.com/join/login-popup/?locale=en_US",
+        data=data,
+        allow_redirects=False,
+    )
+    if r.status_code != 302:
+        return "", "", "", "", True
+    
+    cookies = cookiejar(r.cookies["client_id"], r.cookies["access_token"], csrf_token)
+
     head = {
-        "authorization": "Bearer " + access_token,
+        "authorization": "Bearer " + r.cookies["access_token"],
         "accept": "application/json, text/plain, */*",
         "x-requested-with": "XMLHttpRequest",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
         "x-forwarded-for": str(
             ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
         ),
-        "x-udemy-authorization": "Bearer " + access_token,
+        "x-udemy-authorization": "Bearer " + r.cookies["access_token"],
         "content-type": "application/json;charset=UTF-8",
         "origin": "https://www.udemy.com",
         "referer": "https://www.udemy.com/",
         "dnt": "1",
     }
-
-    r = requests.get(
+    
+    s = requests.session()
+    s.cookies.update(cookies)
+    s.headers.update(head)
+    s.keep_alive = False
+    
+    r = s.get(
         "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True", headers=head
     ).json()
     currency = r["Config"]["price_country"]["currency"]
     user = ""
     user = r["me"]["display_name"]
 
-    s = requests.session()
-    s.cookies.update(cookies)
-    s.keep_alive = False
-
-    return head, user, currency, s
+    
+    save_config(config)
+    return head, user, currency, s, False
 
 
 def title_in_exclusion(title, t_x):
@@ -581,17 +630,16 @@ def main1():
 config, instructor_exclude, title_exclude = load_config()
 ############## MAIN ############# MAIN############## MAIN ############# MAIN ############## MAIN ############# MAIN ###########
 
-
-try:
-    access_token = config["access_token"]
-    client_id = config["client_id"]
-    csrftoken = ""
-    cookies = cookiejar(client_id, access_token)
-    head, user, currency, s = check_login()
-
-except Exception as e:
-    print(fr + "Login error")
-    exit()
+retry=True
+while retry:
+    if not (config["email"] or config["password"]):
+        config["email"] = input("Email: ")
+        config["password"] = input("Password: ")
+    print("Trying to login")
+    head, user, currency, s, retry = check_login()
+    if retry:
+        continue
+    
 try:
     update_available()
 except:
@@ -614,7 +662,7 @@ for name in config["sites"]:
         sites.append(name)
         user_dumb = False
 
-for cat in config["category"]:
+for cat in config["categories"]:
     if config["category"][cat]:
         categories.append(cat)
 

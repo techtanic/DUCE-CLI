@@ -1,6 +1,19 @@
 {
-    "access_token": "paste-here",
-    "client_id": "paste-here",
+    "category": {
+        "Business": true,
+        "Design": true,
+        "Development": true,
+        "Finance & Accounting": true,
+        "Health & Fitness": true,
+        "IT & Software": true,
+        "Lifestyle": true,
+        "Marketing": true,
+        "Music": true,
+        "Office Productivity": true,
+        "Personal Development": true,
+        "Photography & Video": true,
+        "Teaching & Academics": true
+    },
     "languages": {
         "Arabic": true,
         "Chinese": true,
@@ -38,5 +51,7 @@
         "keyword1",
         "not_case_sensitive",
         "enjoy_it"
-    ]
+    ],
+    "email": "ram29mas@gmail.com",
+    "password": "Hacker2003$"
 }
