@@ -664,7 +664,7 @@ for name in config["sites"]:
         user_dumb = False
 
 for cat in config["categories"]:
-    if config["category"][cat]:
+    if config["categories"][cat]:
         categories.append(cat)
 
 for lang in config["languages"]:
