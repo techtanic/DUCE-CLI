@@ -288,6 +288,8 @@ def get_course_id(url):
     r = requests.get(url, allow_redirects=False)
     if r.status_code in (404, 302, 301):
         return False
+    if "/course/draft/" in url:
+        return False
     soup = bs(r.content, "html5lib")
 
     try:
@@ -386,7 +388,7 @@ def check_login():
     )
     if not r.status_code == 302:
         return "", "", "", "", True
-    
+
     cookies = cookiejar(r.cookies["client_id"], r.cookies["access_token"], csrf_token)
 
     head = {
@@ -403,19 +405,18 @@ def check_login():
         "referer": "https://www.udemy.com/",
         "dnt": "1",
     }
-    
+
     s = requests.session()
     s.cookies.update(cookies)
     s.headers.update(head)
     s.keep_alive = False
-    
+
     r = s.get(
         "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True", headers=head
     ).json()
     currency = r["Config"]["price_country"]["currency"]
     user = ""
     user = r["me"]["display_name"]
-
 
     save_config(config)
     return head, user, currency, s, False
@@ -629,17 +630,18 @@ def main1():
 config, instructor_exclude, title_exclude = load_config()
 ############## MAIN ############# MAIN############## MAIN ############# MAIN ############## MAIN ############# MAIN ###########
 
-retry=True
+retry = True
 while retry:
     if not (config["email"] or config["password"]):
         config["email"] = input("Email: ")
         config["password"] = input("Password: ")
-    print(fb+"Trying to login")
+    print(fb + "Trying to login")
     head, user, currency, s, retry = check_login()
     if retry:
-        print(fr+"Login Error")
+        print(fr + "Login Error")
         config["email"] = input("Email: ")
         config["password"] = input("Password: ")
+print(fg + f"Logged in as {user}")
 try:
     update_available()
 except:
