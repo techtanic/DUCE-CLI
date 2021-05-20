@@ -415,7 +415,6 @@ def check_login():
         "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True", headers=head
     ).json()
     currency = r["Config"]["price_country"]["currency"]
-    user = ""
     user = r["me"]["display_name"]
 
     save_config(config)
