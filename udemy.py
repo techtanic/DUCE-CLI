@@ -334,8 +334,7 @@ def course_landing_api(courseid):
     r = s.get(
         "https://www.udemy.com/api-2.0/course-landing-components/"
         + courseid
-        + "/me/?components=purchase,instructor_bio",
-        headers=head,
+        + "/me/?components=purchase,instructor_bio"
     ).json()
 
     instructor = (
@@ -369,14 +368,14 @@ def check_login():
     r = s.get("https://www.udemy.com/join/login-popup/?locale=en_US")
     soup = bs(r.text, "html5lib")
     try:
-        csrf_token = soup.find("input", {"name": "csrfmiddlewaretoken"})["value"]
-    except TypeError:
+        s.cookies["csrftoken"]
+    except:
         print("Login not possible right now.")
         exit()
     data = {
         "email": config["email"],
         "password": config["password"],
-        "csrfmiddlewaretoken": csrf_token,
+        "csrfmiddlewaretoken": s.cookies["csrftoken"],
     }
     s.headers.update(
         {"Referer": "https://www.udemy.com/join/login-popup/?locale=en_US"}
@@ -389,7 +388,7 @@ def check_login():
     if not r.status_code == 302:
         return "", "", "", "", True
 
-    cookies = cookiejar(r.cookies["client_id"], r.cookies["access_token"], csrf_token)
+    cookies = cookiejar(s.cookies["client_id"], s.cookies["access_token"], s.cookies["csrftoken"])
 
     head = {
         "authorization": "Bearer " + r.cookies["access_token"],
@@ -412,7 +411,7 @@ def check_login():
     s.keep_alive = False
 
     r = s.get(
-        "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True", headers=head
+        "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True"
     ).json()
     currency = r["Config"]["price_country"]["currency"]
     user = r["me"]["display_name"]
@@ -444,7 +443,6 @@ def free_checkout(coupon, courseid):
 
     r = s.post(
         "https://www.udemy.com/payment/checkout-submit/",
-        headers=head,
         data=payload,
         verify=False,
     )
@@ -454,15 +452,13 @@ def free_checkout(coupon, courseid):
 def free_enroll(courseid):
 
     s.get(
-        "https://www.udemy.com/course/subscribe/?courseId=" + str(courseid),
-        headers=head,
+        "https://www.udemy.com/course/subscribe/?courseId=" + str(courseid)
     )
 
     r = s.get(
         "https://www.udemy.com/api-2.0/users/me/subscribed-courses/"
         + str(courseid)
-        + "/?fields%5Bcourse%5D=%40default%2Cbuyable_object_type%2Cprimary_subcategory%2Cis_private",
-        headers=head,
+        + "/?fields%5Bcourse%5D=%40default%2Cbuyable_object_type%2Cprimary_subcategory%2Cis_private"
     )
     return r.json()
 
