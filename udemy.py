@@ -646,7 +646,6 @@ try:
 except:
     pass
 
-
 all_functions = create_scrape_obj()
 funcs = {}
 sites = []
