@@ -367,15 +367,11 @@ def check_login():
     s = cloudscraper.create_scraper()
     r = s.get("https://www.udemy.com/join/login-popup/?locale=en_US")
     soup = bs(r.text, "html5lib")
-    try:
-        s.cookies["csrftoken"]
-    except:
-        print("Login not possible right now.")
-        exit()
+    csrf_token= soup.find("input", {"name": "csrfmiddlewaretoken"})["value"]
     data = {
         "email": config["email"],
         "password": config["password"],
-        "csrfmiddlewaretoken": s.cookies["csrftoken"],
+        "csrfmiddlewaretoken": csrf_token,
     }
     s.headers.update(
         {"Referer": "https://www.udemy.com/join/login-popup/?locale=en_US"}
@@ -388,7 +384,7 @@ def check_login():
     if not r.status_code == 302:
         return "", "", "", "", True
 
-    cookies = cookiejar(s.cookies["client_id"], s.cookies["access_token"], s.cookies["csrftoken"])
+    cookies = cookiejar(r.cookies["client_id"], r.cookies["access_token"], csrf_token)
 
     head = {
         "authorization": "Bearer " + r.cookies["access_token"],
