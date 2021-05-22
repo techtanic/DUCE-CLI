@@ -193,7 +193,7 @@ def idcoupons():
 
 # Constants
 
-version = "v1.2"
+version = "v1.3"
 
 
 def create_scrape_obj():
@@ -224,64 +224,64 @@ def cookiejar(
     return cookies
 
 
-def save_config(config):
+def save_settings(settings):
     if True:
         with open("duce-cli-settings.json", "w") as f:
-            json.dump(config, f, indent=4)
+            json.dump(settings, f, indent=4)
 
 
-def load_config():
+def load_settings():
     try:
         with open("duce-cli-settings.json") as f:
-            config = json.load(f)
+            settings = json.load(f)
 
     except FileNotFoundError:
-        config = requests.get(
+        settings = requests.get(
             "https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json"
         ).json()
 
-    new_config = requests.get(
+    new_settings = requests.get(
         "https://raw.githubusercontent.com/techtanic/DUCE-CLI/master/duce-cli-settings.json"
     ).json()
 
     try:  # v1.1
-        config["languages"]["Hindi"]
+        settings["languages"]["Hindi"]
     except KeyError:
-        config["languages"]["Hindi"] = True
-        config["languages"]["Arabic"] = True
+        settings["languages"]["Hindi"] = True
+        settings["languages"]["Arabic"] = True
     try:  # v1.1
-        del config["category"]
-        config["categories"] = new_config["categories"]
+        del settings["category"]
+        settings["categories"] = new_settings["categories"]
     except KeyError:
         pass
     try:  # v1.1
-        config["min_rating"]
+        settings["min_rating"]
     except KeyError:
-        config["min_rating"] = 0.0
+        settings["min_rating"] = 0.0
 
     try:  # v1.2
-        del config["access_token"]
-        del config["client_id"]
-        config["email"] = ""
-        config["password"] = ""
+        del settings["access_token"]
+        del settings["client_id"]
+        settings["email"] = ""
+        settings["password"] = ""
     except:
         pass
 
     try:  #!Important
-        config["instructor_exclude"] = config["exclude_instructor"]
-        del config["exclude_instructor"]
+        settings["instructor_exclude"] = settings["exclude_instructor"]
+        del settings["exclude_instructor"]
     except KeyError:
         pass
-    instructor_exclude = "\n".join(config["instructor_exclude"])
+    instructor_exclude = "\n".join(settings["instructor_exclude"])
     try:
-        title_exclude = "\n".join(config["title_exclude"])
+        title_exclude = "\n".join(settings["title_exclude"])
     except KeyError:
-        config["title_exclude"] = []
-        title_exclude = "\n".join(config["title_exclude"])
+        settings["title_exclude"] = []
+        title_exclude = "\n".join(settings["title_exclude"])
 
-    save_config(config)
+    save_settings(settings)
 
-    return config, instructor_exclude, title_exclude
+    return settings, instructor_exclude, title_exclude
 
 
 def get_course_id(url):
@@ -363,18 +363,21 @@ def update_available():
         return
 
 
-def check_login():
+def check_login(email, password):
     s = cloudscraper.create_scraper()
     r = s.get("https://www.udemy.com/join/login-popup/?locale=en_US")
     soup = bs(r.text, "html5lib")
-    csrf_token= soup.find("input", {"name": "csrfmiddlewaretoken"})["value"]
+    csrf_token = soup.find("input", {"name": "csrfmiddlewaretoken"})["value"]
     data = {
-        "email": config["email"],
-        "password": config["password"],
+        "email": email,
+        "password": password,
         "csrfmiddlewaretoken": csrf_token,
     }
     s.headers.update(
-        {"Referer": "https://www.udemy.com/join/login-popup/?locale=en_US"}
+        {
+            "Referer": "https://www.udemy.com/join/login-popup/?locale=en_US",
+            "user-agent": "APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)",
+        }
     )
     r = s.post(
         "https://www.udemy.com/join/login-popup/?locale=en_US",
@@ -382,7 +385,14 @@ def check_login():
         allow_redirects=False,
     )
     if not r.status_code == 302:
-        return "", "", "", "", True
+        soup = bs(r.content, "html5lib")
+        txt = soup.find("div", class_="alert alert-danger js-error-alert").text.strip()
+        if txt[0] == "Y":
+            return "", "", "", "", "Too many logins per hour try later"
+        elif txt[0] == "T":
+            return "", "", "", "", "Email or password incorrect"
+        else:
+            return "", "", "", "", txt
 
     cookies = cookiejar(r.cookies["client_id"], r.cookies["access_token"], csrf_token)
 
@@ -406,14 +416,12 @@ def check_login():
     s.headers.update(head)
     s.keep_alive = False
 
-    r = s.get(
-        "https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True"
-    ).json()
+    r = s.get("https://www.udemy.com/api-2.0/contexts/me/?me=True&Config=True").json()
     currency = r["Config"]["price_country"]["currency"]
     user = r["me"]["display_name"]
-
-    save_config(config)
-    return head, user, currency, s, False
+    settings["email"], settings["password"] = email, password
+    save_settings(settings)
+    return head, user, currency, s, ""
 
 
 def title_in_exclusion(title, t_x):
@@ -447,9 +455,7 @@ def free_checkout(coupon, courseid):
 
 def free_enroll(courseid):
 
-    s.get(
-        "https://www.udemy.com/course/subscribe/?courseId=" + str(courseid)
-    )
+    s.get("https://www.udemy.com/course/subscribe/?courseId=" + str(courseid))
 
     r = s.get(
         "https://www.udemy.com/api-2.0/users/me/subscribed-courses/"
@@ -618,20 +624,21 @@ def main1():
         print(e)
 
 
-config, instructor_exclude, title_exclude = load_config()
+settings, instructor_exclude, title_exclude = load_settings()
 ############## MAIN ############# MAIN############## MAIN ############# MAIN ############## MAIN ############# MAIN ###########
 
-retry = True
-while retry:
-    if not (config["email"] or config["password"]):
-        config["email"] = input("Email: ")
-        config["password"] = input("Password: ")
+txt = True
+while txt:
+    if settings["email"] or settings["password"]:
+        email, password = settings["email"], settings["password"]
+    else:
+        email = input("Email: ")
+        password = input("Password: ")
     print(fb + "Trying to login")
-    head, user, currency, s, retry = check_login()
-    if retry:
-        print(fr + "Login Error")
-        config["email"] = input("Email: ")
-        config["password"] = input("Password: ")
+    head, user, currency, s, txt = check_login(email, password)
+    if txt:
+        print(fr + txt)
+
 print(fg + f"Logged in as {user}")
 try:
     update_available()
@@ -643,23 +650,23 @@ funcs = {}
 sites = []
 categories = []
 languages = []
-instructor_exclude = config["instructor_exclude"]
-title_exclude = config["title_exclude"]
-min_rating = config["min_rating"]
+instructor_exclude = settings["instructor_exclude"]
+title_exclude = settings["title_exclude"]
+min_rating = settings["min_rating"]
 user_dumb = True
 
-for name in config["sites"]:
-    if config["sites"][name]:
+for name in settings["sites"]:
+    if settings["sites"][name]:
         funcs[name] = all_functions[name]
         sites.append(name)
         user_dumb = False
 
-for cat in config["categories"]:
-    if config["categories"][cat]:
+for cat in settings["categories"]:
+    if settings["categories"][cat]:
         categories.append(cat)
 
-for lang in config["languages"]:
-    if config["languages"][lang]:
+for lang in settings["languages"]:
+    if settings["languages"][lang]:
         languages.append(lang)
 
 if user_dumb:
