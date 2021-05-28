@@ -1,7 +1,0 @@
-requests
-BeautifulSoup4
-bs4
-html5lib
-colorama
-tqdm
-cloudscraper
